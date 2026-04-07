@@ -1,0 +1,24 @@
+{
+  "name": "agent-printer",
+  "version": "0.1.0",
+  "description": "MCP server for AI-driven 3D printing on AnkerMake M5",
+  "type": "module",
+  "main": "build/index.js",
+  "bin": {
+    "agent-printer": "build/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node build/index.js",
+    "dev": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.8.0"
+  }
+}
