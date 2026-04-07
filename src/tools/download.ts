@@ -50,7 +50,7 @@ export function registerDownloadTools(server: McpServer) {
             files.map((f, i) => `  ${i}: ${f.name} (${formatBytes(f.sizeBytes)})${i === file_index ? " [downloaded]" : ""}`).join("\n");
         }
 
-        const downloadUrl = await getDownloadUrl(file.id);
+        const downloadUrl = await getDownloadUrl(file.id, model_id);
 
         const res = await fetch(downloadUrl);
         if (!res.ok) {

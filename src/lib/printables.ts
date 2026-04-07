@@ -29,11 +29,10 @@ export async function searchPrintables(
   ordering = "best_match",
 ): Promise<SearchResult[]> {
   const data = (await gql(
-    `query SearchModels($query: String!, $limit: Int!, $ordering: SearchChoicesEnum) {
-      result: searchPrintsV4(
+    `query SearchModels($query: String!, $limit: Int!) {
+      result: searchPrints2(
         query: $query
         limit: $limit
-        ordering: $ordering
       ) {
         items {
           id
@@ -45,7 +44,7 @@ export async function searchPrintables(
         }
       }
     }`,
-    { query, limit, ordering },
+    { query, limit },
   )) as {
     result: {
       items: {
@@ -97,30 +96,29 @@ export async function getModelFiles(modelId: string): Promise<ModelFile[]> {
   }));
 }
 
-export async function getDownloadUrl(fileId: string): Promise<string> {
+export async function getDownloadUrl(fileId: string, printId: string): Promise<string> {
   const data = (await gql(
-    `mutation GetDownloadLink($id: ID!) {
-      getDownloadLink(id: $id) {
+    `mutation GetDownloadLink($id: ID!, $printId: ID!, $source: DownloadSourceEnum!, $fileType: DownloadFileTypeEnum!) {
+      getDownloadLink(id: $id, printId: $printId, source: $source, fileType: $fileType) {
         ok
-        errors
+        errors { field messages }
         output {
           link
         }
       }
     }`,
-    { id: fileId },
+    { id: fileId, printId, source: "model_detail", fileType: "stl" },
   )) as {
     getDownloadLink: {
       ok: boolean;
-      errors: string[];
+      errors: { field: string; messages: string[] }[] | null;
       output: { link: string } | null;
     };
   };
 
   if (!data.getDownloadLink.ok || !data.getDownloadLink.output?.link) {
-    throw new Error(
-      `Failed to get download link: ${data.getDownloadLink.errors?.join(", ") || "unknown error"}`,
-    );
+    const errMsg = data.getDownloadLink.errors?.map((e) => `${e.field}: ${e.messages.join(", ")}`).join("; ") || "unknown error";
+    throw new Error(`Failed to get download link: ${errMsg}`);
   }
   return data.getDownloadLink.output.link;
 }
